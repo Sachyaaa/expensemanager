@@ -37,7 +37,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseResponse creteExpense(ExpenseRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with id " + request.getCategoryId() + " not found"));
 
         Expense expense = new Expense();
         expense.setTitle(request.getTitle());
@@ -54,7 +54,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseResponse getExpenseById(Long id) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense with id "+ id + " not found"));
 
         return toResponse(expense);
     }
@@ -70,10 +70,10 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseResponse updateExpense(Long id, ExpenseRequest request) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense with id "+ id + " not found"));
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with id " + request.getCategoryId() + " not found"));
 
         expense.setTitle(request.getTitle());
         expense.setAmount(request.getAmount());
@@ -90,7 +90,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     public void deleteExpense(Long id) {
 
         if (!expenseRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Expense not found");
+            throw new ResourceNotFoundException("Expense with id "+ id + " not found");
         }
         expenseRepository.deleteById(id);
     }

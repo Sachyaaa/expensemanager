@@ -1,0 +1,338 @@
+{
+  "info": {
+    "name": "expense_manger",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Category",
+      "item": [
+        {
+          "name": "create",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\":\"Other\",\n  \"description\": \"all other expenses\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "getAll",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/categories",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "getById",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/categories/4",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "4"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "update",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/categories/2",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "2"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\":\"Transport\",\n  \"description\": \"things where we can travel\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "delete",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/categories/7",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "categories",
+                "7"
+              ],
+              "query": [],
+              "variable": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "expenses",
+      "item": [
+        {
+          "name": "create",
+          "event": [],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/expenses",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "expenses"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Uber Ride\",\n  \"amount\": 220,\n  \"date\": \"2025-11-28\",\n  \"notes\": \"Client meeting travel\",\n  \"categoryId\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "getAll",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/expenses",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "expenses"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "getById",
+          "event": [],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/expenses/5",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "expenses",
+                "5"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "update",
+          "event": [],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/expenses/5",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "expenses",
+                "5"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lunch\",\n  \"amount\": 150,\n  \"date\": \"2025-11-28\",\n  \"notes\": \"office lunch\",\n  \"categoryId\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "delete",
+          "event": [],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "url": {
+              "raw": "http://localhost:8080/api/expenses/5",
+              "protocol": "http",
+              "host": [
+                "localhost:8080"
+              ],
+              "path": [
+                "api",
+                "expenses",
+                "5"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": []
+}

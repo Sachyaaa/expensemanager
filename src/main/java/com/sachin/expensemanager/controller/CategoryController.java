@@ -1,5 +1,6 @@
 package com.sachin.expensemanager.controller;
 
+import com.sachin.expensemanager.common.ApiResponse;
 import com.sachin.expensemanager.dto.category.CategoryRequest;
 import com.sachin.expensemanager.dto.category.CategoryResponse;
 import com.sachin.expensemanager.service.CategoryService;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
@@ -17,29 +20,33 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryResponse> create(@Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> create(@Valid @RequestBody CategoryRequest request) {
+        CategoryResponse response = categoryService.createCategory(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoryService.createCategory(request));
+                .body(ApiResponse.success("Category created successfully", response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    public ResponseEntity<ApiResponse<CategoryResponse>> getById(@PathVariable Long id) {
+        CategoryResponse response = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(ApiResponse.success("Category Fetched", response));
     }
 
     @GetMapping
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {
+        List<CategoryResponse> response = categoryService.getAllCategories();
+        return ResponseEntity.ok(ApiResponse.success("All categories Fetched", response));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, request));
+    public ResponseEntity<ApiResponse<CategoryResponse>> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
+        CategoryResponse response = categoryService.updateCategory(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully", null));
     }
 }

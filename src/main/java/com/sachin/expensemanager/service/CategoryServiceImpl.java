@@ -21,7 +21,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse createCategory(CategoryRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
-            throw new DuplicateResourceException("Category already exists");
+            throw new DuplicateResourceException("Category already exists with name: "+ request.getName());
         }
 
         Category category = new Category();
@@ -44,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with id " + id + " not found"));
 
         return mapToResponse(category);
     }
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category with id " + id + " not found"));
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
@@ -65,7 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Category not found");
+            throw new ResourceNotFoundException("Category with id " + id + " not found");
         }
 
         categoryRepository.deleteById(id);
