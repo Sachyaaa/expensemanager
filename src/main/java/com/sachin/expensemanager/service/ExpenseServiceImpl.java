@@ -14,12 +14,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ExpenseServiceImpl implements ExpenseService{
+public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
 
-    private ExpenseResponse toResponse(Expense expense){
+    private ExpenseResponse toResponse(Expense expense) {
         ExpenseResponse res = new ExpenseResponse();
 
         res.setId(expense.getId());
@@ -54,7 +54,7 @@ public class ExpenseServiceImpl implements ExpenseService{
     @Override
     public ExpenseResponse getExpenseById(Long id) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
         return toResponse(expense);
     }
@@ -70,10 +70,10 @@ public class ExpenseServiceImpl implements ExpenseService{
     @Override
     public ExpenseResponse updateExpense(Long id, ExpenseRequest request) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(()-> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         expense.setTitle(request.getTitle());
         expense.setAmount(request.getAmount());
@@ -89,7 +89,7 @@ public class ExpenseServiceImpl implements ExpenseService{
     @Override
     public void deleteExpense(Long id) {
 
-        if(!expenseRepository.existsById(id)){
+        if (!expenseRepository.existsById(id)) {
             throw new ResourceNotFoundException("Expense not found");
         }
         expenseRepository.deleteById(id);

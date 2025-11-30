@@ -19,27 +19,27 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @PostMapping
-    public ResponseEntity<ExpenseResponse> create(@Valid @RequestBody ExpenseRequest request){
+    public ResponseEntity<ExpenseResponse> create(@Valid @RequestBody ExpenseRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(expenseService.creteExpense(request));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExpenseResponse> getById(@PathVariable Long id){
+    public ResponseEntity<ExpenseResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(expenseService.getExpenseById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponse>> getAll(){
+    public ResponseEntity<List<ExpenseResponse>> getAll() {
         return ResponseEntity.ok(expenseService.getAllExpenses());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseResponse> update(@PathVariable Long id, @Valid @RequestBody ExpenseRequest request){
+    public ResponseEntity<ExpenseResponse> update(@PathVariable Long id, @Valid @RequestBody ExpenseRequest request) {
         return ResponseEntity.ok(expenseService.updateExpense(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }

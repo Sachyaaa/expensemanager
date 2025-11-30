@@ -1,8 +1,8 @@
 package com.sachin.expensemanager.exception;
 
-public class DuplicateResourceException extends RuntimeException{
+public class DuplicateResourceException extends RuntimeException {
 
-    public DuplicateResourceException(String message){
+    public DuplicateResourceException(String message) {
         super(message);
     }
 

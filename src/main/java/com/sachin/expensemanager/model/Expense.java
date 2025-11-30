@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="expenses", indexes ={
+@Table(name = "expenses", indexes = {
         @Index(name = "idx_expense_date", columnList = "date"),
         @Index(name = "idx_expense_category", columnList = "category_id")
 })
@@ -39,7 +39,7 @@ public class Expense {
     private LocalDateTime createdAt;
 
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         createdAt = LocalDateTime.now();
     }
 }
