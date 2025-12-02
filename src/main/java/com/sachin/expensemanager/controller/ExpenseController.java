@@ -1,6 +1,7 @@
 package com.sachin.expensemanager.controller;
 
 import com.sachin.expensemanager.common.ApiResponse;
+import com.sachin.expensemanager.dto.common.PagedResponse;
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
 import com.sachin.expensemanager.service.ExpenseService;
@@ -36,6 +37,18 @@ public class ExpenseController {
     public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAll() {
         List<ExpenseResponse> response = expenseService.getAllExpenses();
         return ResponseEntity.ok(ApiResponse.success("All expenses fetched", response));
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> getPagedExpenses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "date") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        PagedResponse<ExpenseResponse> response = expenseService.getExpenses(page, size, sortBy, direction);
+
+        return ResponseEntity.ok(ApiResponse.success("Expenses Fetched successfully", response));
     }
 
     @PutMapping("/{id}")
