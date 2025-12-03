@@ -7,10 +7,13 @@ import com.sachin.expensemanager.dto.expense.ExpenseResponse;
 import com.sachin.expensemanager.service.ExpenseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -49,6 +52,25 @@ public class ExpenseController {
         PagedResponse<ExpenseResponse> response = expenseService.getExpenses(page, size, sortBy, direction);
 
         return ResponseEntity.ok(ApiResponse.success("Expenses Fetched successfully", response));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> filterExpenses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "date") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount
+    ) {
+        PagedResponse<ExpenseResponse> result = expenseService.filterExpenses(page, size, sortBy, direction, categoryId, fromDate, toDate, minAmount, maxAmount);
+
+        return ResponseEntity.ok(ApiResponse.success("Filtered expenses", result));
     }
 
     @PutMapping("/{id}")

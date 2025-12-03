@@ -8,13 +8,17 @@ import com.sachin.expensemanager.model.Category;
 import com.sachin.expensemanager.model.Expense;
 import com.sachin.expensemanager.repository.CategoryRepository;
 import com.sachin.expensemanager.repository.ExpenseRepository;
+import com.sachin.expensemanager.specification.ExpenseSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -89,6 +93,48 @@ public class ExpenseServiceImpl implements ExpenseService {
         PagedResponse<ExpenseResponse> response = new PagedResponse<>();
 
         response.setContent(dtos);
+        response.setPageNumber(expensePage.getNumber());
+        response.setPageSize(expensePage.getSize());
+        response.setTotalElements(expensePage.getTotalElements());
+        response.setTotalPages(expensePage.getTotalPages());
+        response.setLast(expensePage.isLast());
+
+        return response;
+    }
+
+    @Override
+    public PagedResponse<ExpenseResponse> filterExpenses(Integer page, Integer size, String sortBy, String direction, Long categoryId, LocalDate fromDate, LocalDate toDate, BigDecimal minAmount, BigDecimal maxAmount) {
+        //validation
+        int pageNumber = (page == null || page < 0) ? 0 : page;
+        int pageSize = (size == null || size <= 0) ? 10 : Math.min(size, 100);
+
+        //sort
+        String safeSortBy = (sortBy == null || sortBy.isBlank()) ? "date" : sortBy;
+        Sort sort = "desc".equalsIgnoreCase(direction) ? Sort.by(safeSortBy).descending()
+                : Sort.by(safeSortBy).ascending();
+
+        //pageable
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        //specification
+        Specification<Expense> spec = Specification
+                .allOf(ExpenseSpecification.hasCatefory(categoryId),
+                        ExpenseSpecification.dateBetween(fromDate, toDate),
+                        ExpenseSpecification.amountBetween(minAmount, maxAmount));
+
+        //execute
+        Page<Expense> expensePage = expenseRepository.findAll(spec, pageable);
+
+        //entity->DTO
+        List<ExpenseResponse> content = expensePage.getContent()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        //paginated response
+        PagedResponse<ExpenseResponse> response = new PagedResponse<>();
+
+        response.setContent(content);
         response.setPageNumber(expensePage.getNumber());
         response.setPageSize(expensePage.getSize());
         response.setTotalElements(expensePage.getTotalElements());
