@@ -7,6 +7,7 @@ import com.sachin.expensemanager.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -18,12 +19,16 @@ public class SummaryServiceImpl implements SummaryService {
 
     @Override
     public MonthlySummaryResponse getMonthlySummary(int year, int month) {
-        return expenseRepository.getMonthlySummary(year, month);
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.plusMonths(1);
+        return expenseRepository.getMonthlySummary(year, month, start, end);
     }
 
     @Override
     public List<CategorySummaryResponse> getCategoryWiseSummary(int year, int month) {
-        return expenseRepository.getCategoryWiseSummary(year, month);
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.plusMonths(1);
+        return expenseRepository.getCategoryWiseSummary(year, month, start, end);
     }
 
     @Override

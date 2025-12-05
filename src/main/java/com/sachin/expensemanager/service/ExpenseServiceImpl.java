@@ -3,9 +3,6 @@ package com.sachin.expensemanager.service;
 import com.sachin.expensemanager.dto.common.PagedResponse;
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
-import com.sachin.expensemanager.dto.summary.CategorySummaryResponse;
-import com.sachin.expensemanager.dto.summary.CombinedMonthlySummaryResponse;
-import com.sachin.expensemanager.dto.summary.MonthlySummaryResponse;
 import com.sachin.expensemanager.exception.ResourceNotFoundException;
 import com.sachin.expensemanager.model.Category;
 import com.sachin.expensemanager.model.Expense;
@@ -30,6 +27,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final CachedCountService cachedCountService;
 
     private ExpenseResponse toResponse(Expense expense) {
         ExpenseResponse res = new ExpenseResponse();
@@ -59,6 +57,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setCategory(category);
 
         expenseRepository.save(expense);
+
+        cachedCountService.resetCount();
 
         return toResponse(expense);
     }
@@ -93,13 +93,15 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .map(this::toResponse)
                 .toList();
 
+        long totalElements = cachedCountService.getCount();
+
         PagedResponse<ExpenseResponse> response = new PagedResponse<>();
 
         response.setContent(dtos);
         response.setPageNumber(expensePage.getNumber());
         response.setPageSize(expensePage.getSize());
-        response.setTotalElements(expensePage.getTotalElements());
-        response.setTotalPages(expensePage.getTotalPages());
+        response.setTotalElements(totalElements);
+        response.setTotalPages((int) Math.ceil((double) totalElements / expensePage.getSize()));
         response.setLast(expensePage.isLast());
 
         return response;
@@ -134,14 +136,16 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .map(this::toResponse)
                 .toList();
 
+        long totalElements = cachedCountService.getCount();
+
         //paginated response
         PagedResponse<ExpenseResponse> response = new PagedResponse<>();
 
         response.setContent(content);
         response.setPageNumber(expensePage.getNumber());
         response.setPageSize(expensePage.getSize());
-        response.setTotalElements(expensePage.getTotalElements());
-        response.setTotalPages(expensePage.getTotalPages());
+        response.setTotalElements(totalElements);
+        response.setTotalPages((int) Math.ceil((double) totalElements / expensePage.getSize()));
         response.setLast(expensePage.isLast());
 
         return response;
@@ -173,5 +177,16 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new ResourceNotFoundException("Expense with id " + id + " not found");
         }
         expenseRepository.deleteById(id);
+
+        cachedCountService.resetCount();
+    }
+
+    @Override
+    public List<ExpenseResponse> getAllExpensesOptimized() {
+        List<Expense> expenses = expenseRepository.findAllWithCategory();
+
+        return expenses.stream()
+                .map(this::toResponse)
+                .toList();
     }
 }

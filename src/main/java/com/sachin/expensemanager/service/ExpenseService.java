@@ -23,4 +23,6 @@ public interface ExpenseService {
 
     void deleteExpense(Long id);
 
+    List<ExpenseResponse> getAllExpensesOptimized();
+
 }

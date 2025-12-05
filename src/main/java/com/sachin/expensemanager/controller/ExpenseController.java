@@ -4,11 +4,7 @@ import com.sachin.expensemanager.common.ApiResponse;
 import com.sachin.expensemanager.dto.common.PagedResponse;
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
-import com.sachin.expensemanager.dto.summary.CategorySummaryResponse;
-import com.sachin.expensemanager.dto.summary.CombinedMonthlySummaryResponse;
-import com.sachin.expensemanager.dto.summary.MonthlySummaryResponse;
 import com.sachin.expensemanager.service.ExpenseService;
-import com.sachin.expensemanager.service.SummaryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -44,6 +40,12 @@ public class ExpenseController {
     public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAll() {
         List<ExpenseResponse> response = expenseService.getAllExpenses();
         return ResponseEntity.ok(ApiResponse.success("All expenses fetched", response));
+    }
+
+    @GetMapping("/optimized")
+    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAllOptimized() {
+        List<ExpenseResponse> response = expenseService.getAllExpensesOptimized();
+        return ResponseEntity.ok(ApiResponse.success("All expenses fetched with JOIN FETCH", response));
     }
 
     @GetMapping("/paged")
