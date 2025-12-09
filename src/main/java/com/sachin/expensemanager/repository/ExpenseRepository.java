@@ -3,6 +3,10 @@ package com.sachin.expensemanager.repository;
 import com.sachin.expensemanager.dto.summary.CategorySummaryResponse;
 import com.sachin.expensemanager.dto.summary.MonthlySummaryResponse;
 import com.sachin.expensemanager.model.Expense;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -44,5 +48,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
             JOIN FETCH e.category
             """)
     List<Expense> findAllWithCategory();
+
+    @EntityGraph(attributePaths = "category")
+    Page<Expense> findAll(Specification<Expense> spec, Pageable pageable);
+
+    @EntityGraph(attributePaths = "category")
+    Page<Expense> findAll(Pageable pageable);
 
 }

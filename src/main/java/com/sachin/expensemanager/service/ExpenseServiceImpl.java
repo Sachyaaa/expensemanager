@@ -10,10 +10,7 @@ import com.sachin.expensemanager.repository.CategoryRepository;
 import com.sachin.expensemanager.repository.ExpenseRepository;
 import com.sachin.expensemanager.specification.ExpenseSpecification;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +24,6 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
-    private final CachedCountService cachedCountService;
 
     private ExpenseResponse toResponse(Expense expense) {
         ExpenseResponse res = new ExpenseResponse();
@@ -57,8 +53,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setCategory(category);
 
         expenseRepository.save(expense);
-
-        cachedCountService.resetCount();
 
         return toResponse(expense);
     }
@@ -93,7 +87,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .map(this::toResponse)
                 .toList();
 
-        long totalElements = cachedCountService.getCount();
+        long totalElements = expensePage.getTotalElements();
 
         PagedResponse<ExpenseResponse> response = new PagedResponse<>();
 
@@ -102,7 +96,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         response.setPageSize(expensePage.getSize());
         response.setTotalElements(totalElements);
         response.setTotalPages((int) Math.ceil((double) totalElements / expensePage.getSize()));
-        response.setLast(expensePage.isLast());
+        response.setLast(!expensePage.hasNext());
 
         return response;
     }
@@ -136,7 +130,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .map(this::toResponse)
                 .toList();
 
-        long totalElements = cachedCountService.getCount();
+        long totalElements = expensePage.getTotalElements();
 
         //paginated response
         PagedResponse<ExpenseResponse> response = new PagedResponse<>();
@@ -146,7 +140,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         response.setPageSize(expensePage.getSize());
         response.setTotalElements(totalElements);
         response.setTotalPages((int) Math.ceil((double) totalElements / expensePage.getSize()));
-        response.setLast(expensePage.isLast());
+        response.setLast(!expensePage.hasNext());
 
         return response;
     }
@@ -177,8 +171,6 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new ResourceNotFoundException("Expense with id " + id + " not found");
         }
         expenseRepository.deleteById(id);
-
-        cachedCountService.resetCount();
     }
 
     @Override
@@ -189,4 +181,5 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .map(this::toResponse)
                 .toList();
     }
+
 }
