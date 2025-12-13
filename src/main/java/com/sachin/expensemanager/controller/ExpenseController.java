@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping
     public ResponseEntity<ApiResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseRequest request) {
         ExpenseResponse response = expenseService.creteExpense(request);
@@ -30,24 +32,28 @@ public class ExpenseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Expense created successfully", response));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ExpenseResponse>> getById(@PathVariable Long id) {
         ExpenseResponse response = expenseService.getExpenseById(id);
         return ResponseEntity.ok(ApiResponse.success("Fetched expense", response));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAll() {
         List<ExpenseResponse> response = expenseService.getAllExpenses();
         return ResponseEntity.ok(ApiResponse.success("All expenses fetched", response));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/optimized")
     public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAllOptimized() {
         List<ExpenseResponse> response = expenseService.getAllExpensesOptimized();
         return ResponseEntity.ok(ApiResponse.success("All expenses fetched with JOIN FETCH", response));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/paged")
     public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> getPagedExpenses(
             @RequestParam(defaultValue = "0") int page,
@@ -60,6 +66,7 @@ public class ExpenseController {
         return ResponseEntity.ok(ApiResponse.success("Expenses Fetched successfully", response));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> filterExpenses(
             @RequestParam(defaultValue = "0") int page,
@@ -79,12 +86,14 @@ public class ExpenseController {
         return ResponseEntity.ok(ApiResponse.success("Filtered expenses", result));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ExpenseResponse>> update(@PathVariable Long id, @Valid @RequestBody ExpenseRequest request) {
         ExpenseResponse response = expenseService.updateExpense(id, request);
         return ResponseEntity.ok(ApiResponse.success("Expense updated successfully", response));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         expenseService.deleteExpense(id);
