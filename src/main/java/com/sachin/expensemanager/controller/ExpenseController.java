@@ -24,7 +24,7 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<ApiResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseRequest request) {
         ExpenseResponse response = expenseService.creteExpense(request);
@@ -37,13 +37,6 @@ public class ExpenseController {
     public ResponseEntity<ApiResponse<ExpenseResponse>> getById(@PathVariable Long id) {
         ExpenseResponse response = expenseService.getExpenseById(id);
         return ResponseEntity.ok(ApiResponse.success("Fetched expense", response));
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getAll() {
-        List<ExpenseResponse> response = expenseService.getAllExpenses();
-        return ResponseEntity.ok(ApiResponse.success("All expenses fetched", response));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
@@ -86,14 +79,14 @@ public class ExpenseController {
         return ResponseEntity.ok(ApiResponse.success("Filtered expenses", result));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ExpenseResponse>> update(@PathVariable Long id, @Valid @RequestBody ExpenseRequest request) {
         ExpenseResponse response = expenseService.updateExpense(id, request);
         return ResponseEntity.ok(ApiResponse.success("Expense updated successfully", response));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         expenseService.deleteExpense(id);

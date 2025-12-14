@@ -8,10 +8,12 @@ import com.sachin.expensemanager.model.Category;
 import com.sachin.expensemanager.model.Expense;
 import com.sachin.expensemanager.repository.CategoryRepository;
 import com.sachin.expensemanager.repository.ExpenseRepository;
+import com.sachin.expensemanager.security.Util.SecurityUtil;
 import com.sachin.expensemanager.specification.ExpenseSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +26,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final SecurityUtil securityUtil;
 
     private ExpenseResponse toResponse(Expense expense) {
         ExpenseResponse res = new ExpenseResponse();
@@ -51,6 +54,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setDate(request.getDate());
         expense.setNotes(request.getNotes());
         expense.setCategory(category);
+        expense.setUser(securityUtil.getCurrentUser());
 
         expenseRepository.save(expense);
 
@@ -62,15 +66,11 @@ public class ExpenseServiceImpl implements ExpenseService {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense with id " + id + " not found"));
 
-        return toResponse(expense);
-    }
+        if (!securityUtil.isAdmin() && !expense.getUser().getEmail().equals(securityUtil.getCurrentUser().getEmail())) {
+            throw new AccessDeniedException("Not allowed");
+        }
 
-    @Override
-    public List<ExpenseResponse> getAllExpenses() {
-        return expenseRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        return toResponse(expense);
     }
 
     @Override
@@ -81,7 +81,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Expense> expensePage = expenseRepository.findAll(pageable);
+        Page<Expense> expensePage;
+
+        if (securityUtil.isAdmin()) {
+            expensePage = expenseRepository.findAll(pageable);
+        } else {
+            expensePage = expenseRepository.findByUser(securityUtil.getCurrentUser(), pageable);
+        }
+
 
         List<ExpenseResponse> dtos = expensePage.getContent().stream()
                 .map(this::toResponse)
@@ -121,8 +128,13 @@ public class ExpenseServiceImpl implements ExpenseService {
                         ExpenseSpecification.dateBetween(fromDate, toDate),
                         ExpenseSpecification.amountBetween(minAmount, maxAmount));
 
-        //execute
-        Page<Expense> expensePage = expenseRepository.findAll(spec, pageable);
+        Page<Expense> expensePage;
+
+        if (securityUtil.isAdmin()) {
+            expensePage = expenseRepository.findAll(spec, pageable);
+        } else {
+            expensePage = expenseRepository.findByUser(securityUtil.getCurrentUser(), spec, pageable);
+        }
 
         //entity->DTO
         List<ExpenseResponse> content = expensePage.getContent()
@@ -150,6 +162,10 @@ public class ExpenseServiceImpl implements ExpenseService {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense with id " + id + " not found"));
 
+        if (!securityUtil.isAdmin() && !expense.getUser().getEmail().equals(securityUtil.getCurrentUser().getEmail())) {
+            throw new AccessDeniedException("Not allowed");
+        }
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category with id " + request.getCategoryId() + " not found"));
 
@@ -166,16 +182,26 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public void deleteExpense(Long id) {
+        Expense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense with id " + id + " not found"));
 
-        if (!expenseRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Expense with id " + id + " not found");
+        if (!securityUtil.isAdmin() && !expense.getUser().getEmail().equals(securityUtil.getCurrentUser().getEmail())) {
+            throw new AccessDeniedException("Not allowed");
         }
+
         expenseRepository.deleteById(id);
     }
 
     @Override
     public List<ExpenseResponse> getAllExpensesOptimized() {
-        List<Expense> expenses = expenseRepository.findAllWithCategory();
+
+        List<Expense> expenses;
+
+        if (securityUtil.isAdmin()) {
+            expenses = expenseRepository.findAllWithCategory();
+        } else {
+            expenses = expenseRepository.findAllWithCategoryAndUser(securityUtil.getCurrentUser());
+        }
 
         return expenses.stream()
                 .map(this::toResponse)

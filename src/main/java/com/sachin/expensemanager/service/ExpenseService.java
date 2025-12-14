@@ -13,8 +13,6 @@ public interface ExpenseService {
 
     ExpenseResponse getExpenseById(Long id);
 
-    List<ExpenseResponse> getAllExpenses();
-
     PagedResponse<ExpenseResponse> getExpenses(int page, int size, String sortBy, String direction);
 
     PagedResponse<ExpenseResponse> filterExpenses(Integer page, Integer size, String sortBy, String direction, Long categoryId, LocalDate fromDate, LocalDate toDate, BigDecimal minAmount, BigDecimal maxAmount);

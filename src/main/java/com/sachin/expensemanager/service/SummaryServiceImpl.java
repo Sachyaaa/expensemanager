@@ -4,6 +4,7 @@ import com.sachin.expensemanager.dto.summary.CategorySummaryResponse;
 import com.sachin.expensemanager.dto.summary.CombinedMonthlySummaryResponse;
 import com.sachin.expensemanager.dto.summary.MonthlySummaryResponse;
 import com.sachin.expensemanager.repository.ExpenseRepository;
+import com.sachin.expensemanager.security.Util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,20 +16,21 @@ import java.util.List;
 public class SummaryServiceImpl implements SummaryService {
 
     private final ExpenseRepository expenseRepository;
+    private final SecurityUtil securityUtil;
 
 
     @Override
     public MonthlySummaryResponse getMonthlySummary(int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.plusMonths(1);
-        return expenseRepository.getMonthlySummary(year, month, start, end);
+        return expenseRepository.getMonthlySummary(securityUtil.getCurrentUser(), year, month, start, end);
     }
 
     @Override
     public List<CategorySummaryResponse> getCategoryWiseSummary(int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.plusMonths(1);
-        return expenseRepository.getCategoryWiseSummary(year, month, start, end);
+        return expenseRepository.getCategoryWiseSummary(securityUtil.getCurrentUser(), year, month, start, end);
     }
 
     @Override
