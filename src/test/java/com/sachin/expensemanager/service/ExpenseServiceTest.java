@@ -2,24 +2,34 @@ package com.sachin.expensemanager.service;
 
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
+import com.sachin.expensemanager.exception.ResourceNotFoundException;
 import com.sachin.expensemanager.model.Category;
 import com.sachin.expensemanager.model.Expense;
+import com.sachin.expensemanager.model.User;
 import com.sachin.expensemanager.repository.CategoryRepository;
 import com.sachin.expensemanager.repository.ExpenseRepository;
-import org.junit.jupiter.api.Assertions;
+import com.sachin.expensemanager.security.Util.SecurityUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
-public class ExpenseServiceTest {
+class ExpenseServiceTest {
+
+    @InjectMocks
+    private ExpenseServiceImpl expenseService;
 
     @Mock
     private ExpenseRepository expenseRepository;
@@ -27,34 +37,140 @@ public class ExpenseServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
-    @InjectMocks
-    private ExpenseServiceImpl expenseService;
+    @Mock
+    private SecurityUtil securityUtil;
 
-    @Test
-    void testCreateExpense(){
-        ExpenseRequest req = new ExpenseRequest();
-        req.setTitle("Test");
-        req.setAmount(new BigDecimal(123));
-        req.setDate(LocalDate.now());
-        req.setCategoryId(1L);
+    private User user;
+    private Category category;
+    private Expense expense;
 
-        Category category = new Category();
-        category.setId(1L);
-        category.setName("Food");
+    @BeforeEach
+    void setup() {
+        user = User.builder()
+                .id(1L)
+                .email("user@gmail.com")
+                .role("ROLE_USER")
+                .build();
 
-        Mockito.when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        category = Category.builder()
+                .id(1L)
+                .name("Food")
+                .build();
 
-        Expense saved = new Expense();
-        saved.setId(1L);
-        saved.setTitle("Test");
-        saved.setCategory(category);
-
-        Mockito.when(expenseRepository.save(Mockito.any(Expense.class))).thenReturn(saved);
-
-        ExpenseResponse res = expenseService.creteExpense(req);
-
-        Assertions.assertEquals("Test", res.getTitle());
-        Assertions.assertEquals(1L, res.getCategoryId());
+        expense = Expense.builder()
+                .id(1L)
+                .title("Lunch")
+                .amount(BigDecimal.valueOf(200))
+                .user(user)
+                .category(category)
+                .build();
     }
 
+    // ---------------- CREATE ----------------
+
+    @Test
+    void shouldCreateExpenseForUser() {
+
+        when(securityUtil.getCurrentUser()).thenReturn(user);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
+
+        ExpenseRequest request = ExpenseRequest.builder()
+                .title("Lunch")
+                .amount(BigDecimal.valueOf(200))
+                .categoryId(1L)
+                .build();
+
+        ExpenseResponse response = expenseService.creteExpense(request);
+
+        assertNotNull(response);
+        assertEquals("Lunch", response.getTitle());
+
+        verify(expenseRepository).save(any(Expense.class));
+    }
+
+    // ---------------- GET BY ID ----------------
+
+    @Test
+    void shouldAllowUserToFetchOwnExpense() {
+
+        when(securityUtil.getCurrentUser()).thenReturn(user);
+        when(securityUtil.isAdmin()).thenReturn(false);
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(expense));
+
+        ExpenseResponse response = expenseService.getExpenseById(1L);
+
+        assertEquals("Lunch", response.getTitle());
+    }
+
+    @Test
+    void shouldThrowAccessDeniedWhenUserFetchesOthersExpense() {
+
+        User otherUser = User.builder()
+                .id(2L)
+                .email("other@gmail.com")
+                .role("ROLE_USER")
+                .build();
+
+        expense.setUser(otherUser);
+
+        when(securityUtil.getCurrentUser()).thenReturn(user);
+        when(securityUtil.isAdmin()).thenReturn(false);
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(expense));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> expenseService.getExpenseById(1L)
+        );
+    }
+
+    // ---------------- UPDATE ----------------
+
+    @Test
+    void shouldAllowAdminToUpdateAnyExpense() {
+
+        when(securityUtil.isAdmin()).thenReturn(true);
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(expense));
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(expenseRepository.save(any())).thenReturn(expense);
+
+        ExpenseRequest request = ExpenseRequest.builder()
+                .title("Dinner")
+                .amount(BigDecimal.valueOf(300))
+                .categoryId(1L)
+                .build();
+
+        ExpenseResponse response =
+                expenseService.updateExpense(1L, request);
+
+        assertEquals("Dinner", response.getTitle());
+    }
+
+    // ---------------- DELETE ----------------
+
+    @Test
+    void shouldDeleteExpenseForOwner() {
+
+        when(securityUtil.getCurrentUser()).thenReturn(user);
+        when(securityUtil.isAdmin()).thenReturn(false);
+        when(expenseRepository.findById(1L)).thenReturn(Optional.of(expense));
+
+        expenseService.deleteExpense(1L);
+
+        verify(expenseRepository).deleteById(1L);
+    }
+
+    // ---------------- NOT FOUND ----------------
+
+    @Test
+    void shouldThrowNotFoundWhenExpenseMissing() {
+
+        when(expenseRepository.findById(99L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> expenseService.getExpenseById(99L)
+        );
+    }
 }

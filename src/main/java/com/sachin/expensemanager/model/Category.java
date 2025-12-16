@@ -1,14 +1,16 @@
 package com.sachin.expensemanager.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "categories")
 @Getter
 @Setter
-public class Category {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Category extends BaseAuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
