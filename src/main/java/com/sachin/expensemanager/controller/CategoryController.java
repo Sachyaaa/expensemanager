@@ -4,6 +4,8 @@ import com.sachin.expensemanager.common.ApiResponse;
 import com.sachin.expensemanager.dto.category.CategoryRequest;
 import com.sachin.expensemanager.dto.category.CategoryResponse;
 import com.sachin.expensemanager.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Category APIs", description = "Manage expense categories")
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
@@ -20,6 +23,8 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @Operation(summary = "Create category",
+            description = "ADMIN only")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponse>> create(@Valid @RequestBody CategoryRequest request) {
@@ -35,6 +40,8 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success("Category Fetched", response));
     }
 
+    @Operation(summary = "Get all categories",
+            description = "Accessible by USER and ADMIN")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAll() {

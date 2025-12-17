@@ -5,6 +5,8 @@ import com.sachin.expensemanager.dto.common.PagedResponse;
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
 import com.sachin.expensemanager.service.ExpenseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Tag(name = "Expense APIs", description = "Manage user expenses")
 @RestController
 @RequestMapping("/api/expenses")
 @RequiredArgsConstructor
@@ -24,6 +27,8 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
 
+    @Operation(summary = "Create expense",
+            description = "Create expense for logged-in user")
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<ApiResponse<ExpenseResponse>> create(@Valid @RequestBody ExpenseRequest request) {
@@ -46,6 +51,8 @@ public class ExpenseController {
         return ResponseEntity.ok(ApiResponse.success("All expenses fetched with JOIN FETCH", response));
     }
 
+    @Operation(summary = "Get paged expenses",
+            description = "USER sees own expenses, ADMIN sees all")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/paged")
     public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> getPagedExpenses(

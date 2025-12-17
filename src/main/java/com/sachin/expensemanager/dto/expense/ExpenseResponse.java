@@ -1,5 +1,6 @@
 package com.sachin.expensemanager.dto.expense;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,5 +21,6 @@ public class ExpenseResponse {
     private Long categoryId;
     private String categoryName;
 
+    @Schema(hidden = true)
     private LocalDateTime createdAt;
 }
