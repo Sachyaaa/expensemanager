@@ -31,7 +31,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_PASSWORD: expense_pass
-      JWT_SECRET: prod-secret-key
+      JWT_SECRET: prod-9M2HkZC6N0TBRxwJ1A7pQ4V5LFDY3sE8mUoGiK
 
 volumes:
   postgres_data:

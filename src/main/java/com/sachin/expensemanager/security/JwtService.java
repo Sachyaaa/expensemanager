@@ -4,34 +4,38 @@ import com.sachin.expensemanager.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class JwtService {
-    private final String SECRET = "THISisFortempUseWillchangelTer12345678901234567890123456789012";
+
+    private final Key signingKey;
+
+    public JwtService(@Value("${jwt.secret}") String secret) {
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be at least 32 characters");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateToken(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole());
-
         return Jwts.builder()
-                .setClaims(claims)
+                .claim("role", user.getRole())
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 24 * 3600 * 1000))
-                .signWith(getSigningKey())
+                .signWith(signingKey)
                 .compact();
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())   // REQUIRED for signed JWT
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -41,7 +45,7 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
-    public String extractRole(String token){
+    public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
@@ -52,9 +56,5 @@ public class JwtService {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -25,52 +25,45 @@ public abstract class BaseIntegrationTest {
     protected MockMvc mockMvc;
 
     @Autowired
-    protected ObjectMapper objectMapper;
-
-    protected String registerAndLoginUser(String email, String password) throws Exception {
-
-        // Register
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s",
-                                  "role": "ROLE_USER"
-                                }
-                                """.formatted(email, password)))
-                .andExpect(status().isOk());
-
-        // Login
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s"
-                                }
-                                """.formatted(email, password)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
-        return json.get("token").asText();
-    }
+    protected TestUserFactory testUserFactory;
 
     protected String loginAdmin(String email, String password) throws Exception {
+        testUserFactory.createAdmin(email, password);
+        return loginAndGetToken(email, password);
+    }
 
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s"
-                                }
-                                """.formatted(email, password)))
+    protected String registerAndLoginUser(String email, String password) throws Exception {
+        testUserFactory.createUser(email, password);
+        return loginAndGetToken(email, password);
+    }
+
+    protected String loginAndGetToken(String email, String password) throws Exception {
+
+        String loginRequestJson = """
+        {
+          "email": "%s",
+          "password": "%s"
+        }
+        """.formatted(email, password);
+
+        MvcResult result = mockMvc.perform(
+                        post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(loginRequestJson)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
-        return objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("token").asText();
+        String response = result.getResponse().getContentAsString();
+
+        // Extract token from JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(response);
+
+        // Adjust path if your response structure is different
+        return rootNode
+                .path("data")
+                .path("token")
+                .asText();
     }
 }
