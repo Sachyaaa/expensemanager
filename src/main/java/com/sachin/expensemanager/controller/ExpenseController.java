@@ -66,7 +66,7 @@ public class ExpenseController {
         return ResponseEntity.ok(ApiResponse.success("Expenses Fetched successfully", response));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")//user not able to acces-need to fix
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<PagedResponse<ExpenseResponse>>> filterExpenses(
             @RequestParam(defaultValue = "0") int page,
