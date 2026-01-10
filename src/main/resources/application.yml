@@ -1,6 +1,8 @@
 spring:
   application:
     name: expense-manager
+  profiles:
+    active: dev
 
 logging:
   pattern:
@@ -12,4 +14,22 @@ server:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Expense Manager
+    description: Personal expense tracking backend
+    version: 2.0.0
 
