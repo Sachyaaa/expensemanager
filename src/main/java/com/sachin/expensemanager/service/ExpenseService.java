@@ -3,6 +3,7 @@ package com.sachin.expensemanager.service;
 import com.sachin.expensemanager.dto.common.PagedResponse;
 import com.sachin.expensemanager.dto.expense.ExpenseRequest;
 import com.sachin.expensemanager.dto.expense.ExpenseResponse;
+import com.sachin.expensemanager.model.Expense;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,4 +24,7 @@ public interface ExpenseService {
 
     List<ExpenseResponse> getAllExpensesOptimized();
 
+    List<Expense> getAllExpenses();
+
+    List<Expense> getExpensesByMonth(Integer year, Integer month);
 }

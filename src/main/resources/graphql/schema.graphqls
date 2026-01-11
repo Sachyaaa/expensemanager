@@ -1,0 +1,30 @@
+type Query {
+    hello: String
+    expenses(year: Int, month: Int): [Expense!]!
+}
+
+type Expense {
+    id: ID!
+    amount: Float!
+    title: String
+    createdAt: String
+    category: Category
+}
+
+type Category {
+    id: ID!
+    name: String!
+}
+
+type Mutation {
+    createExpense(input: ExpenseRequestInput!): Expense!
+    deleteExpense(input: ID!): Boolean!
+}
+
+input ExpenseRequestInput {
+    title: String!
+    amount: Float!
+    date: String!
+    notes: String
+    categoryId: ID!
+}

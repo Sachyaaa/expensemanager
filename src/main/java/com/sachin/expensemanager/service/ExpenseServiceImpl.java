@@ -208,4 +208,14 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .toList();
     }
 
+    @Override
+    public List<Expense> getAllExpenses() {
+        return expenseRepository.findAll();
+    }
+
+    @Override
+    public List<Expense> getExpensesByMonth(Integer year, Integer month) {
+        return expenseRepository.findByYearAndMonth(year, month);
+    }
+
 }

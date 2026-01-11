@@ -42,6 +42,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     );
 
     @Query("""
+        SELECT e
+        FROM Expense e
+        WHERE EXTRACT(YEAR FROM e.createdAt) = :year
+          AND EXTRACT(MONTH FROM e.createdAt) = :month
+    """)
+    List<Expense> findByYearAndMonth(
+            @Param("year") int year,
+            @Param("month") int month
+    );
+
+    @Query("""
                 SELECT new com.sachin.expensemanager.dto.summary.CategorySummaryResponse(
                     e.category.id,
                     e.category.name,
